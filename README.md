@@ -1,12 +1,10 @@
 #  Look Ahead
 
-SIGIR 2023 Short Paper
 
 This repository contains the code of [Look Ahead] Improving the Accuracy of Time-Series Forecasting by Previewing Future Time Features 
 <p align="center">
 <img src="method.png" height = "250" alt="" align=center />
 <br><br>
-<b>Figure 1.</b> Overall architecture of Autoformer.
 </p>
 
 # Dependencies
