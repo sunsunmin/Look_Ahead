@@ -7,6 +7,8 @@ from torch import optim
 import os
 import time
 
+torch.manual_seed(1)
+
 class AuxiliaryLearningModel(object):
     def __init__(self, args):
         self.args = args
@@ -17,15 +19,18 @@ class AuxiliaryLearningModel(object):
         self.m1 = nn.Linear(d_inp, 512)
         self.m2 = nn.Linear(512, 512)
         self.m3 = nn.Linear(512, d_inp)
-    
+        
+        
+        self.model = nn.Sequential(
+            self.m1,
+            self.m2,
+            self.m3
+        )
+        
 
     def _get_data(self, flag):
         data_set, data_loader = data_provider(self.args, flag)
         return data_set, data_loader
-
-    def _select_optimizer(self):
-        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
-        return model_optim
 
     def _select_criterion(self):
         criterion = nn.MSELoss()
@@ -34,14 +39,14 @@ class AuxiliaryLearningModel(object):
     def train(self, setting):
         train_data, train_loader = self._get_data(flag='train')
 
-        model_optim = self._select_optimizer()
+        #model_optim = self._select_optimizer()
         criterion = self._select_criterion()
 
         if self.args.use_amp:
             scaler = torch.cuda.amp.GradScaler()
 
         for epoch in range(self.args.train_epochs):
-            device = torch.device('cuda:0')
+            #device = torch.device('cuda:0')
             iter_count = 0
             train_loss = []
 
@@ -52,14 +57,11 @@ class AuxiliaryLearningModel(object):
             batch_x, batch_y, batch_x_mark, batch_y_mark, seq_x_mark_sequentail, seq_y_mark_sequentail) in enumerate(
                     train_loader):
                 iter_count += 1
-                model_optim.zero_grad()
 
-                x = seq_x_mark_sequentail.float().to(device)
-                y = seq_y_mark_sequentail.float().to(device)
-
-                prediction = self.m1(x) 
-                prediction = self.m2(prediction)
-                prediction = self.m3(prediction)
+                x = seq_x_mark_sequentail.float()#.to(device)
+                y = seq_y_mark_sequentail.float()#.to(device)
+                
+                prediction = self.model(x)
             
                 cost = F.mse_loss(prediction, y)
 
@@ -67,6 +69,8 @@ class AuxiliaryLearningModel(object):
                 cost.backward()
                 optimizer.step()
 
+                print('epoch : ',epoch)
 
-        torch.save(self.m2.state_dict(), './layer.pt')
+
+        torch.save(self.m2.state_dict(), './layer.pt') 
         return
