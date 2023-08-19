@@ -46,13 +46,23 @@ class TimeFeatureEmbedding(nn.Module):
 
         freq_map = {'h': 4, 't': 5, 's': 6, 'm': 1, 'a': 1, 'w': 2, 'd': 3, 'b': 3}
         d_inp = freq_map[freq]
+
         self.embed = nn.Linear(d_inp, d_model, bias=False)
-        self.m2 = nn.Linear(d_model, d_model)
-    def forward(self, x):
+
+        self.m1 = nn.Linear(d_inp, d_model)
+        self.m2 = nn.Linear(d_model, d_inp)
         
-        self.m2.load_state_dict(torch.load("./layer.pt"))
-        x_ = self.embed(x)
-        x_ = self.m2(x_)
+        self.model = nn.Sequential(
+            self.m1,
+            self.m2
+        )
+
+    def forward(self, x):
+
+        self.model.load_state_dict(torch.load("./model.pt"))
+
+        x_ = self.model(x)
+        x_ = self.embed(x_)
 
         return x_
 
