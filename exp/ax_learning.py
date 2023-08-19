@@ -17,14 +17,11 @@ class AuxiliaryLearningModel(object):
         d_inp = freq_map[self.args.freq]
         
         self.m1 = nn.Linear(d_inp, 512)
-        self.m2 = nn.Linear(512, 512)
-        self.m3 = nn.Linear(512, d_inp)
-        
-        
+        self.m2 = nn.Linear(512, d_inp)      
+
         self.model = nn.Sequential(
             self.m1,
-            self.m2,
-            self.m3
+            self.m2
         )
         
 
@@ -71,6 +68,7 @@ class AuxiliaryLearningModel(object):
 
                 print('epoch : ',epoch)
 
-
-        torch.save(self.m2.state_dict(), './layer.pt') 
+      
+        torch.save(self.model.state_dict(), './model.pt') 
+     
         return
